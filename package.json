@@ -1,5 +1,5 @@
 {
-  "name": "rplidar",
+  "name": "@tsofist/rplidar",
   "version": "1.0.1",
   "description": "Driver for slamtec RPLidar",
   "main": "lib",
