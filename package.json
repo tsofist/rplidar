@@ -1,6 +1,7 @@
 {
   "name": "rplidar",
   "version": "1.0.0",
+  "description": "Driver for slamtec RPLidar",
   "main": "lib",
   "scripts": {
     "build": "rimraf lib && tsc",
@@ -29,5 +30,13 @@
   },
   "files": [
     "lib"
+  ],
+  "author": "Andrew Berdnikov <tsofistgudmen@gmail.com>",
+  "license": "MIT",
+  "homepage": "https://github.com/tsofist/rplidar#readme",
+  "keywords": [
+    "lidar",
+    "rplidar",
+    "slamtec"
   ]
 }
