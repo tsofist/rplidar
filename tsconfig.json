@@ -1,0 +1,21 @@
+{
+  "compilerOptions": {
+    "module": "commonjs",
+    "target": "es2020",
+    "outDir": "lib",
+    "moduleResolution": "node",
+    "sourceMap": true,
+    "declaration": true,
+    "alwaysStrict": true,
+    "strict": true,
+    "noImplicitAny": true,
+    "noEmitOnError": true,
+    "noEmitHelpers": true,
+    "importHelpers": true,
+    "noImplicitReturns": true,
+    "noImplicitThis": true,
+    "noImplicitOverride": true
+  },
+  "include": ["src"],
+  "exclude": ["lib", "node_modules"]
+}
