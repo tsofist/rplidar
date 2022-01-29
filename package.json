@@ -10,13 +10,13 @@
     "start-dev": "npm run build && NODE_ENV=development npm run start"
   },
   "dependencies": {
+    "@types/node": "~16.11.7",
+    "@types/serialport": "~8.0.2",
     "serialport": "~9.2.8",
     "tslib": "~2.3.1"
   },
   "devDependencies": {
     "typescript": "~4.5.5",
-    "@types/node": "^16.11.7",
-    "@types/serialport": "^8.0.2",
     "rimraf": "^3.0.2",
     "eslint": "^8.8.0",
     "eslint-config-prettier": "^8.3.0",
