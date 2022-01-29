@@ -7,7 +7,8 @@
     "build": "rimraf lib && tsc",
     "lint": "eslint src -c .eslintrc.yaml",
     "start": "node --unhandled-rejections=strict lib",
-    "start-dev": "npm run build && NODE_ENV=development npm run start"
+    "start-dev": "npm run build && NODE_ENV=development npm run start",
+    "release": "semantic-release"
   },
   "dependencies": {
     "@types/node": "~16.11.7",
@@ -16,17 +17,21 @@
     "tslib": "~2.3.1"
   },
   "devDependencies": {
-    "typescript": "~4.5.5",
-    "rimraf": "^3.0.2",
+    "@semantic-release/git": "~10.0.1",
+    "@semantic-release/github": "~8.0.2",
+    "@semantic-release/npm": "~9.0.0",
+    "@typescript-eslint/eslint-plugin": "^5.10.1",
+    "@typescript-eslint/parser": "^5.10.1",
     "eslint": "^8.8.0",
     "eslint-config-prettier": "^8.3.0",
     "eslint-plugin-import": "^2.25.4",
     "eslint-plugin-json-format": "^2.0.1",
     "eslint-plugin-prettier": "^4.0.0",
     "eslint-plugin-yml": "^0.13.0",
-    "@typescript-eslint/eslint-plugin": "^5.10.1",
-    "@typescript-eslint/parser": "^5.10.1",
-    "prettier": "^2.5.1"
+    "prettier": "^2.5.1",
+    "rimraf": "^3.0.2",
+    "semantic-release": "~19.0.2",
+    "typescript": "~4.5.5"
   },
   "files": [
     "lib"
