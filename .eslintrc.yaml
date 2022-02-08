@@ -91,3 +91,49 @@ overrides:
       - 'eslint:recommended'
       - 'plugin:import/typescript'
       - 'plugin:@typescript-eslint/recommended'
+    rules:
+      '@typescript-eslint/explicit-member-accessibility':
+        - error
+        - accessibility: no-public
+      '@typescript-eslint/explicit-module-boundary-types': off
+      '@typescript-eslint/no-explicit-any': off
+      '@typescript-eslint/no-non-null-assertion': off
+      '@typescript-eslint/no-this-alias': error
+      '@typescript-eslint/return-await': off
+      '@typescript-eslint/no-floating-promises': error
+      '@typescript-eslint/no-unnecessary-type-assertion': error
+      '@typescript-eslint/no-unused-vars': off
+      '@typescript-eslint/no-misused-new': error
+      '@typescript-eslint/no-misused-promises': off
+      '@typescript-eslint/no-array-constructor': error
+      '@typescript-eslint/no-useless-constructor': error
+      '@typescript-eslint/adjacent-overload-signatures': error
+      '@typescript-eslint/consistent-type-assertions': error
+      '@typescript-eslint/indent': off
+      '@typescript-eslint/semi': error
+      '@typescript-eslint/member-delimiter-style':
+        - error
+        - multiline:
+            delimiter: semi
+            requireLast: true
+          singleline:
+            delimiter: semi
+            requireLast: false
+      '@typescript-eslint/space-before-function-paren':
+        - warn
+        - anonymous: always
+          named: never
+          asyncArrow: always
+      '@typescript-eslint/no-meaningless-void-operator': error
+      'no-return-await': error
+      'no-unused-vars': off
+      'quotes':
+        - error
+        - single
+        - allowTemplateLiterals: true
+          avoidEscape: true
+      'quote-props':
+        - error
+        - consistent-as-needed
+      'indent': off
+      'space-before-function-paren': off

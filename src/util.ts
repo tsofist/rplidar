@@ -1,13 +1,5 @@
-import type { EventEmitter } from 'events';
-
 export function raise(message: string): never {
     throw new Error(message);
-}
-
-export function waitForEvent<T = unknown>(emitter: EventEmitter, event: string) {
-    return new Promise<T>((resolve) => {
-        emitter.once(event, resolve);
-    });
 }
 
 export function delay(ms = 0) {

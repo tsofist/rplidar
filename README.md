@@ -1,6 +1,25 @@
-# nodejs driver for [slamtec RPLidar](https://www.slamtec.com/en/Lidar)
+# NodeJS (and Web Serial API) driver for [slamtec RPLidar](https://www.slamtec.com/en/Lidar)
 
-This driver tested only on [A1](https://www.slamtec.com/en/Lidar/A1Spec).
+Please note: *this driver tested only on [A1](https://www.slamtec.com/en/Lidar/A1Spec) (but it will certainly suit
+advanced models without significant problems).*
+
+Yep, you can use the driver both in NodeJS and even in your browser at almost maximum design speeds!
+
+## Installing
+```ts
+// Usual module for NodeJS
+import {RPLidar} from '@tsofist/rplidar';
+
+// Usual module (for bundling) for Browser
+import {RPLidarBrowser} from '@tsofist/rplidar';
+
+// Independent module for Browser (as esm/cjs module)
+import {RPLidarBrowser} from '@tsofist/rplidar/lib/rplidar-browser.esm.js';
+import {RPLidarBrowser} from '@tsofist/rplidar/lib/rplidar-browser.js';
+
+// Independent module for Browser from CDN as esm
+import {RPLidarBrowser} from 'https://unpkg.com/@tsofist/lib/rplidar-browser.esm.js';
+```
 
 ## Usage
 
@@ -10,7 +29,6 @@ const lidar = new RPLidar();
 console.log('Opening lidar port..');
 
 await lidar.open();
-// Lidar spinning by default
 await lidar.motorStop();
 
 console.log(`RPLidar ready on "${lidar.serialPortPath}"`);

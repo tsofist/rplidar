@@ -36,8 +36,11 @@ export interface RPLidarScanSampleRates {
 export interface RPLidarScanModeInfo {
     id: number;
     name: string;
+    /** Maximum distance for this scan mode (in meters) */
     maxDistance: number;
+    /** Time cost for one measurement (in milliseconds) */
     sampleTime: number;
+    /** This mode is typical for scanning */
     isTypical: boolean;
 }
 export declare type RPLidarPortFinder = (port: PortInfo) => boolean | undefined;
