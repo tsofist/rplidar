@@ -18,7 +18,7 @@ import {RPLidarBrowser} from '@tsofist/rplidar/lib/rplidar-browser.esm.js';
 import {RPLidarBrowser} from '@tsofist/rplidar/lib/rplidar-browser.js';
 
 // Independent module for Browser from CDN as esm
-import {RPLidarBrowser} from 'https://unpkg.com/@tsofist/lib/rplidar-browser.esm.js';
+import {RPLidarBrowser} from 'https://unpkg.com/@tsofist/rplidar/lib/rplidar-browser.esm.js';
 ```
 
 ## Usage
