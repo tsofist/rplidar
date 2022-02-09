@@ -107,20 +107,10 @@ export class RPLidarBrowser extends RPLidarDriverBase {
     }
 
     protected async doPortReadAll(): Promise<number> {
-        this.debugLog('READ ALL BYTES');
         const reader = this.portReader;
         const v = await reader.read();
         const add = this.#portReaderBuffer.flush();
         return (v.value?.length || 0) + add;
-    }
-
-    protected async portDrain(): Promise<void> {
-        this.debugLog('DRAIN PORT');
-        if (this.portReadable && this.portReader) {
-            this.#portReaderBuffer.flush();
-            await this.portReader.cancel();
-            this.#portReader = this.portReadable.getReader();
-        }
     }
 
     protected async doPortRead(len: number): Promise<Uint8Array> {

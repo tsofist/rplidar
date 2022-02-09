@@ -21,7 +21,6 @@ export declare class RPLidarBrowser extends RPLidarDriverBase {
     close(): Promise<void>;
     protected resolvePort(): Promise<BrowserSerialPort>;
     protected doPortReadAll(): Promise<number>;
-    protected portDrain(): Promise<void>;
     protected doPortRead(len: number): Promise<Uint8Array>;
     protected doPortWrite(data: number[]): Promise<void>;
 }

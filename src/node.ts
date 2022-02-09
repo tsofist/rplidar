@@ -127,13 +127,6 @@ export class RPLidar extends RPLidarDriverBase {
             });
         });
     }
-
-    protected async portDrain(): Promise<void> {
-        this.debugLog('DRAIN PORT');
-        await this.port.flush();
-        this.port.drain();
-        await this.portReadAll();
-    }
 }
 
 void (async () => {

@@ -76,7 +76,6 @@ export declare abstract class RPLidarDriverBase extends EventEmitter {
     protected abstract doPortWrite(data: Uint8Array | number[]): Promise<void>;
     protected abstract doPortReadAll(): Promise<number>;
     protected abstract doPortRead(len: number): Promise<Uint8Array>;
-    protected abstract portDrain(): Promise<void>;
     protected portReadAll(): Promise<number>;
     protected portRead(len: number): Promise<Uint8Array>;
     protected portWrite(data: Uint8Array | number[]): Promise<void>;

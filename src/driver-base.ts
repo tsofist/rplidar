@@ -65,6 +65,8 @@ export abstract class RPLidarDriverBase extends EventEmitter {
 
     #reading: Promise<any> | undefined;
     #writing: Promise<any> | undefined;
+    #streaming: Promise<any> | undefined;
+
     #rpmStat: RPMStat | undefined;
     #currentCommand: Command | undefined;
     #scanning = false;
@@ -196,34 +198,52 @@ export abstract class RPLidarDriverBase extends EventEmitter {
             async (descriptor) => {
                 this.emit('scan:start');
                 this.#scanning = true;
-                const raw = await this.portRead(descriptor.size);
-                if (raw.length !== 5) {
-                    console.error(raw);
-                    raise(`Incorrect start scan data`);
+
+                let finishStreaming: undefined | (() => void);
+                this.#streaming = new Promise<void>((resolve) => {
+                    finishStreaming = resolve;
+                });
+
+                const done = () => {
+                    this.#streaming = undefined;
+                    finishStreaming && finishStreaming();
+                };
+
+                {
+                    const raw = await this.portRead(descriptor.size);
+                    if (raw.length !== 5) {
+                        console.error(raw);
+                        raise(`Incorrect start scan data`);
+                    }
                 }
 
                 void (async () => {
                     let cache = new Uint8Array();
-                    do {
-                        const data = await this.portRead(descriptor.size);
-                        if (!this.scanning) {
-                            await this.portDrain();
-                            return;
-                        }
+                    // eslint-disable-next-line no-constant-condition
+                    while (true) {
+                        if (
+                            this.scanning ||
+                            !this.currentCommand ||
+                            this.currentCommand === Command.Scan
+                        ) {
+                            const data = await this.portRead(descriptor.size);
 
-                        const { sample, buffer } = this.collectScanResponse(data, cache);
-                        if (!sample && !buffer) {
-                            cache = new Uint8Array();
-                            return;
-                        }
-                        if (sample) this.onScanSample(sample);
+                            if (!this.scanning) {
+                                await this.reset();
+                                return done();
+                            }
 
-                        cache = buffer || new Uint8Array();
-                    } while (
-                        this.scanning ||
-                        !this.currentCommand ||
-                        this.currentCommand === Command.Scan
-                    );
+                            const { sample, buffer } = this.collectScanResponse(data, cache);
+                            if (!sample && !buffer) {
+                                return done();
+                            }
+                            if (sample) this.onScanSample(sample);
+
+                            cache = buffer || new Uint8Array();
+                        } else {
+                            return done();
+                        }
+                    }
                 })();
             },
             commandDescriptorChecker(5, 129, false),
@@ -232,6 +252,8 @@ export abstract class RPLidarDriverBase extends EventEmitter {
 
     async scanStop() {
         await this.writeCommand(Command.Stop, [CommandStartByte, 0x25], async () => {
+            this.#scanning = false;
+            await this.#streaming;
             this.resetScanning();
         });
     }
@@ -293,9 +315,9 @@ export abstract class RPLidarDriverBase extends EventEmitter {
     protected abstract doPortWrite(data: Uint8Array | number[]): Promise<void>;
     protected abstract doPortReadAll(): Promise<number>;
     protected abstract doPortRead(len: number): Promise<Uint8Array>;
-    protected abstract portDrain(): Promise<void>;
 
     protected async portReadAll() {
+        this.debugLog('READ ALL BYTES');
         try {
             await this.#writing;
             return (this.#reading = this.doPortReadAll());
@@ -498,7 +520,8 @@ export abstract class RPLidarDriverBase extends EventEmitter {
     }
 
     protected resetScanning() {
-        if (this.scanning) {
+        if (this.scanning || this.#streaming) {
+            this.#streaming = undefined;
             this.#scanning = false;
             this.#rpmStat = undefined;
             this.emit('scan:stop');

@@ -14,5 +14,4 @@ export declare class RPLidar extends RPLidarDriverBase {
     protected resolvePortPath(portPath: string | RPLidarPortFinder): Promise<string>;
     protected doPortRead(len: number): Promise<Uint8Array>;
     protected doPortReadAll(): Promise<number>;
-    protected portDrain(): Promise<void>;
 }
