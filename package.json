@@ -1,6 +1,6 @@
 {
   "name": "@tsofist/rplidar",
-  "version": "2.2.0",
+  "version": "2.3.0",
   "description": "NodeJS (+WebSerial API) driver for slamtec RPLidar",
   "main": "lib",
   "browser": "lib/browser",
