@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>RPLidar test</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.3/css/bulma.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div id="app" class="mt-4 container hidden">
+    <div class="panel is-dark">
+        <p class="panel-heading">
+            Common
+        </p>
+        <div class="panel-block">
+            <div class="m-1 tag is-black">
+                Ready:
+                <span class="red">{{ ready }}</span>
+            </div>
+            <div class="m-1 tag is-black">
+                Opened:
+                <span class="red">{{ opened }}</span>
+            </div>
+        </div>
+        <div class="panel-block">
+            <div class="buttons">
+                <button :disabled="opened || !ready" class="button is-info" @click="open()">Open port</button>
+                <button :disabled="!opened" class="button is-info" @click="close()">Close port</button>
+                <button :disabled="!opened" class="button is-info" @click="reset()">Reset</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="panel is-dark">
+        <p class="panel-heading">
+            Scanning
+        </p>
+        <div class="panel-block">
+            <div class="m-1 tag is-black">
+                Scanning:
+                <span class="red">{{ scanning }}</span>
+            </div>
+            <div class="m-1 tag is-black">
+                Scanning speed:
+                <span class="red">{{ scanningRPM }}RPM ({{ scanningHz }}Hz)</span>
+            </div>
+            <div class="m-1 tag is-black">
+                Samples:
+                <span class="red">{{ samples }}</span>
+            </div>
+        </div>
+        <div class="panel-block">
+            <div class="buttons">
+                <button :disabled="!opened" class="button is-info" @click="scanStart()">Start</button>
+                <button :disabled="!opened" class="button is-info" @click="scanStop()">Stop</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="panel is-dark">
+        <p class="panel-heading">
+            Motor
+        </p>
+        <div class="panel-block">
+            <div class="buttons">
+                <button :disabled="!opened" class="button is-info" @click="motorStart()">Start</button>
+                <button :disabled="!opened" class="button is-info" @click="motorStop()">Stop</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="panel is-dark">
+        <p class="panel-heading">
+            Info
+        </p>
+        <div class="panel-block">
+            <div class="buttons">
+                <button :disabled="!opened || scanning" class="button is-info" @click="getInfo()">Device info</button>
+                <button :disabled="!opened || scanning" class="button is-info" @click="getHealth()">Health status</button>
+                <button :disabled="!opened || scanning" class="button is-info" @click="getRates()">Scanning rates</button>
+                <button :disabled="!opened || scanning" class="button is-info" @click="getModes()">Scanning modes</button>
+            </div>
+        </div>
+        <div class="panel-block">
+            <pre>{{ information || '–' }}</pre>
+        </div>
+    </div>
+</div>
+
+<div id="radar" class="box"></div>
+
+<script type="module">
+    // import {RPLidarBrowser} from '../lib/rplidar-browser.esm.js';
+    import {RPLidarBrowser} from 'https://unpkg.com/@tsofist/rplidar/lib/rplidar-browser.esm.js';
+    import * as d3 from "https://cdn.skypack.dev/d3@7";
+    import {
+        ref,
+        createApp,
+        onMounted,
+        onBeforeMount
+    } from 'https://unpkg.com/vue@3.2.31/dist/vue.esm-browser.prod.js';
+
+    createApp({
+        setup() {
+            const ready = ref(false);
+            const opened = ref(false);
+
+            const scanning = ref(false);
+            const samples = ref(0);
+            const scanningRPM = ref(0);
+            const scanningHz = ref(0);
+
+            let lidar;
+            const data = {value: []};
+
+            onBeforeMount(() => {
+                const point = document.getElementById('app');
+                point.classList.remove('hidden');
+            });
+
+            onMounted(async () => {
+                const sceneSelector = '#radar';
+
+                let scene = createScene(data, sceneSelector);
+                setInterval(() => {
+                    scene.refresh();
+                }, 75);
+
+                window.addEventListener('resize', () => {
+                    document.querySelector(sceneSelector).innerHTML = '';
+                    scene = createScene(data);
+                })
+
+                lidar = new RPLidarBrowser();
+                // lidar.debug = true;
+
+                window.lidar = lidar;
+
+                // const originEmit = lidar.emit;
+                // lidar.emit = (function (event, ...args) {
+                //     console.log('EVENT:', event);
+                //     return originEmit.call(lidar, event, ...args);
+                // }).bind(lidar);
+
+                const onClosed = () => {
+                    opened.value = false;
+                    data.value = [];
+                    samples.value = 0;
+                }
+
+                lidar.on('close', onClosed);
+                lidar.on('disconnect', onClosed);
+
+                lidar.on('scan:start', () => {
+                    scanning.value = true;
+                });
+                lidar.on('scan:stop', () => {
+                    scanning.value = false;
+                });
+                lidar.on(`scan:sample`, (sample) => {
+                    scanningRPM.value = lidar.scanningRPM;
+                    scanningHz.value = lidar.scanningHz;
+                    // if (sample.quality < 10 /*|| sample.distance < 30*/) return;
+                    if (data.value.length > 500) data.value.shift();
+                    data.value.push(sample);
+                    samples.value++;
+                });
+
+                ready.value = true;
+            });
+
+            const open = async () => {
+                await lidar.open();
+                await lidar.motorStop();
+                opened.value = true;
+            }
+
+            const information = ref('');
+
+            const close = async () => {
+                await lidar.close();
+            }
+            const reset = async () => {
+                await lidar.reset();
+            }
+            const getInfo = async () => {
+                information.value = await lidar.getInfo();
+            }
+            const getHealth = async () => {
+                information.value = await lidar.getHealth();
+            }
+            const getRates = async () => {
+                information.value = await lidar.getSamplesRate();
+            }
+            const getModes = async () => {
+                information.value = await lidar.listScanModes();
+            }
+            const scanStart = async () => {
+                await motorStart();
+                await lidar.scanStart();
+            }
+            const scanStop = async () => {
+                await lidar.scanStop();
+                await motorStop();
+            }
+            const motorStart = async () => {
+                await lidar.motorStart(true);
+            }
+            const motorStop = async () => {
+                await lidar.motorStop();
+            }
+
+            return {
+                open,
+                scanning, samples,
+                ready, opened,
+                scanningRPM, scanningHz,
+                information,
+                close,
+                reset,
+                getInfo,
+                getHealth,
+                getRates,
+                getModes,
+                scanStart, scanStop,
+                motorStart, motorStop,
+            }
+        }
+    }).mount('#app');
+
+    function createScene(data, target) {
+        const zoom = 2;
+
+        let width = window.innerWidth - 50;
+        let height = window.innerHeight - 50;
+        let radius = Math.min(width, height) / 2 - 50;
+
+        const r = d3.scaleLinear()
+            .domain([0, 7])
+            .range([0, radius]);
+
+        const svg = d3.select(target)
+            .append('svg')
+            .attr('width', width)
+            .attr('height', height)
+            .append('g')
+            .attr('transform', `translate(${width / 2 + 15}, ${height / 2 + 15})`);
+
+        const gr = svg.append('g')
+            .attr('class', 'r axis')
+            .selectAll('g')
+            .data(r.ticks(7).slice(1))
+            .enter().append('g');
+
+        gr.append('circle')
+            .attr('r', r);
+        gr.append('text')
+            .attr('y', d => -r(d) - 4)
+            .attr('transform', 'rotate(15)')
+            .style('text-anchor', 'middle')
+            .text(d => `${d / zoom}m`);
+
+        const ga = svg.append('svg:g')
+            .attr('class', 'a axis')
+            .selectAll('g')
+            .data(d3.range(0, 360, 30))
+            .enter().append('g')
+            .attr('transform', d => `rotate(${-d})`);
+
+        ga.append('line')
+            .attr('x2', radius);
+        ga.append('text')
+            .attr('x', radius + 6)
+            .attr('dy', '.35em')
+            .style('text-anchor', d => d < 270 && d > 90 ? 'end' : null)
+            .attr('transform', d => d < 270 && d > 90 ? `rotate(180 ${(radius + 6)},0)` : null)
+            .text(d => `${d}\u00B0`);
+
+        const root = svg
+            .append('svg:g')
+            .attr('id', 'data');
+
+        const refresh = () => {
+            root.selectAll('circle')
+                .exit()
+                .remove();
+
+            const points = root
+                .selectAll('circle')
+                .data(data.value, (d) => d.angle);
+
+            const rr = radius / 7000;
+
+            points
+                .enter()
+                .append('svg:circle')
+                .attr('class', 'point')
+                .attr('r', 2)
+                .attr('cx', (d) => zoom * d.distance * -Math.cos((d.angle * Math.PI) / 180) * rr)
+                .attr('cy', (d) => zoom * d.distance * -Math.sin((d.angle * Math.PI) / 180) * rr)
+
+            points
+                .exit()
+                .remove();
+        }
+
+        return {
+            refresh,
+        }
+    }
+</script>
+
+</body>
+</html>

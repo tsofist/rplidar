@@ -3,7 +3,7 @@
 Please note: *this driver tested only on [A1](https://www.slamtec.com/en/Lidar/A1Spec) (but it will certainly suit
 advanced models without significant problems).*
 
-Yep, you can use the driver both in NodeJS and even in your browser at almost maximum design speeds!
+Yep, you can use the driver both in NodeJS and even in your browser at almost maximum design speeds ([~440RPM for A1](./demo/index.html))!
 
 ## Installing
 ```ts
